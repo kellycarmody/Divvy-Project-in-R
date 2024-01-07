@@ -1,0 +1,612 @@
+
+
+##Loading/Installing packages
+
+
+#Loads readr library
+library(readr)
+
+#Installs tidyverse package
+install.packages("tidyverse")
+
+#install geodist package
+##For using to convert latitude/longitude into ride distance
+install.packages("geodist")
+
+#install scales package
+###For use trying to convert numbers to percents on graphs
+install.packages("scales")
+
+#Loads scales library
+library("scales")
+
+#Loads core tidyverse packages
+##Should include lubridate
+library(tidyverse)
+
+#Loads geodist library  
+library(geodist)
+
+#Loads ggplot2 library
+library(ggplot2)
+
+
+##Loading/Merging Data
+
+###For merge decided to take samples of 20,000 from each 
+###of the 12 datasets from 2023 for month, this should be an accurate
+###representation monthly and by season, while not exceeding
+###computational resources
+
+
+#Load CSV cyclistic files
+
+
+#cyclistic_data = read_csv("cyclistic_data_in_csv.csv")
+
+cyclistic_full_jan = read_csv("202201-divvy-tripdata.csv")
+cyclistic_full_feb = read_csv("202202-divvy-tripdata.csv")
+cyclistic_full_mar = read_csv("202203-divvy-tripdata.csv")
+cyclistic_full_april = read_csv("202201-divvy-tripdata.csv")
+cyclistic_full_may = read_csv("202205-divvy-tripdata.csv")
+cyclistic_full_june = read_csv("202206-divvy-tripdata.csv")
+cyclistic_full_july = read_csv("202207-divvy-tripdata.csv")
+cyclistic_full_aug = read_csv("202208-divvy-tripdata.csv")
+cyclistic_full_sep = read_csv("202209-divvy-tripdata.csv")
+cyclistic_full_oct = read_csv("202210-divvy-tripdata.csv")
+cyclistic_full_nov = read_csv("202211-divvy-tripdata.csv")
+cyclistic_full_dec = read_csv("202212-divvy-tripdata.csv")
+
+cyclistic_sample_jan = sample_n(cyclistic_full_jan, 20000)
+cyclistic_sample_feb = sample_n(cyclistic_full_feb, 20000)
+cyclistic_sample_mar = sample_n(cyclistic_full_mar, 20000)
+cyclistic_sample_april = sample_n(cyclistic_full_april, 20000)
+cyclistic_sample_may = sample_n(cyclistic_full_may, 20000)
+cyclistic_sample_june = sample_n(cyclistic_full_june, 20000)
+cyclistic_sample_july = sample_n(cyclistic_full_july, 20000)
+cyclistic_sample_aug = sample_n(cyclistic_full_aug, 20000)
+cyclistic_sample_sep = sample_n(cyclistic_full_sep, 20000)
+cyclistic_sample_oct = sample_n(cyclistic_full_oct, 20000)
+cyclistic_sample_nov = sample_n(cyclistic_full_nov, 20000)
+cyclistic_sample_dec = sample_n(cyclistic_full_dec, 20000)
+
+
+cyclistic_data = rbind(cyclistic_sample_jan, cyclistic_sample_feb,
+                      cyclistic_sample_mar, cyclistic_sample_april,
+                      cyclistic_sample_may, cyclistic_sample_june,
+                      cyclistic_sample_july, cyclistic_sample_aug,
+                      cyclistic_sample_sep, cyclistic_sample_oct,
+                      cyclistic_sample_nov, cyclistic_sample_dec)
+
+
+#Remove extra uneeded datasets
+
+
+#If you need to remove any data to make it cleaner, can use
+#remove() function, i.e. remove(cyclistic_data)
+
+###Removes all extraneous datsets, everything besides
+###cyclistic_data and cyclistic_data_trimmed
+###Removes full datasets
+remove(cyclistic_full_jan)
+remove(cyclistic_full_feb)
+remove(cyclistic_full_mar)
+remove(cyclistic_full_april)
+remove(cyclistic_full_may)
+remove(cyclistic_full_june)
+remove(cyclistic_full_july)
+remove(cyclistic_full_aug)
+remove(cyclistic_full_sep)
+remove(cyclistic_full_oct)
+remove(cyclistic_full_nov)
+remove(cyclistic_full_dec)
+###Removes 12 sample datasets
+remove(cyclistic_sample_jan)
+remove(cyclistic_sample_feb)
+remove(cyclistic_sample_mar)
+remove(cyclistic_sample_april)
+remove(cyclistic_sample_may)
+remove(cyclistic_sample_june)
+remove(cyclistic_sample_july)
+remove(cyclistic_sample_aug)
+remove(cyclistic_sample_sep)
+remove(cyclistic_sample_oct)
+remove(cyclistic_sample_nov)
+remove(cyclistic_sample_dec)
+
+
+##Exploratory Phase
+
+
+#View file to get an idea of it
+View(cyclistic_data)
+
+#Gives # of observations, # of variables, good quick
+#overview of data
+glimpse(cyclistic_data)
+
+#Gives names of all variables in dataframe
+names(cyclistic_data)
+
+#Puts dataframe "in play" so that it can be easily accessed
+attach(cyclistic_data)
+
+#Gives classes of each item in dataframe\
+##Character means string
+##Double allows you to store decimals
+##Integer would be only whole numbers
+str(cyclistic_data)
+
+#Shows you what unique values column holds
+##rideable_type has 2 possible values, electric_bike
+##and classic_bike
+unique(rideable_type)
+
+##More than 1000 start stations, 1000 plus 141 it seems
+unique(start_station_name)
+
+#Checks if there are any NA variables for a specific variable
+##in this case no missing variables for ride_id
+View(cyclistic_data[is.na(ride_id), ])
+
+##No missing variables for rideable_type
+View(cyclistic_data[is.na(rideable_type), ])
+
+##No missing variables for started_at
+View(cyclistic_data[is.na(started_at), ])
+
+##55,003 missing variables for start_station_name
+View(cyclistic_data[is.na(start_station_name), ])
+
+##55,003 missing variables for start_station_id
+View(cyclistic_data[is.na(start_station_id), ])
+
+##57,899 missing variables for end_station_name
+##Sometimes end_station id is blank and start_station_name
+## is blank, sometimes only end_station, sometimes only
+##start_station_name
+View(cyclistic_data[is.na(end_station_name), ])
+
+#57,899 missing values for end_station_id
+View(cyclistic_data[is.na(end_station_id), ])
+
+#No missing values for start_lat
+View(cyclistic_data[is.na(start_lat), ])
+
+#No missing values for start_lng
+View(cyclistic_data[is.na(start_lng), ])
+
+#350 missing values for end_lat
+View(cyclistic_data[is.na(end_lat), ])
+
+#350 missing values for end_lng
+View(cyclistic_data[is.na(end_lng), ])
+
+#No missing values for member_casual
+View(cyclistic_data[is.na(member_casual), ])
+
+
+##Cleaning Data
+##RUN CODE FROM HERE
+
+
+#Trims leading and trailing(but not middle) white spaces
+#from entire dataframe(in theory)
+##Note if it worked, pay special attention to this
+##if any issues arise, not sure if it's trimmed properly
+
+cyclistic_data.trimmed <- data.frame(lapply(
+  cyclistic_data, trimws))
+
+#Checking length of all string variables
+
+##Checking length of ride_id, min 16 variables, max 16 variables
+max(nchar(cyclistic_data.trimmed$ride_id))
+min(nchar(cyclistic_data.trimmed$ride_id)) 
+
+#Creates a new pipe with 'assignment pipe" operator, %<>%,
+##Which means cyclistic_data.trimmed will be saved and can be
+##used in the next pipe
+cyclistic_data.trimmed %<>%
+#Selecting all columns, with : for the startig and ending
+select('ride_id':'member_casual') %>%
+#ommitting all NA values
+##After dropping, there are 274,798 full entries left
+na.omit() %>%
+#Select distinct value(i.e. filter out for duplicates)
+#There are no duplicate values, data remains at 274,798 obs.
+distinct() #%<%
+#View()
+
+
+##Processing/Transforming Data
+
+
+#Creating time category breakdowns
+breaks <- hour(hm("00:00", "6:00", "10:00", "12:00",
+                  "16:00", "19:00", "23:59"))
+
+#labelling time category breakdowns
+##Keep in mind that 6-10 AM may be morning commute, and
+##4PM-7PM may be evening commute
+labels <- c("Late Night 12AM-6AM",
+            "Early Morning 6AM-10AM",
+            "Late Morning 10AM-12PM",
+            "Early-Mid Afternoon 12PM-4PM",
+            "Late Afternoon-Early Evening 4PM-7PM",
+            "Night 7PM-12AM")
+
+cyclistic_data.trimmed %<>%
+select("ride_id":"member_casual") %>%
+#Mutate function adds an additional column to the dataframe
+#Difftime function, with units at "hour" calculates difference
+#between 2 datestamps
+##Created ride_time in hours for every ride
+##ended_time should be before started_time, otherwise values
+##will be negative
+mutate(ride_time = difftime(ended_at,started_at, units = "hours")) %>%
+#Filter conditionally drops variables you don't want
+##Drops those variables where start time is before end time,
+##now we have 274,722 observations left
+filter(ride_time > 0) %>%
+#wday function isolates, day of week, Sunday is 1, Monday 2 etc.
+##Created week_day_started variable with day of week ride
+##started on
+mutate(week_day_started = wday(started_at)) %>%
+#Cut and breaks(that are labelled) can help you break down
+#categorical variables into a time stamp
+##Created a variable for the time of the day the ride started
+mutate(time_of_day_started = cut(x=hour(started_at), breaks = breaks,
+                               labels = labels, include.lowest = TRUE)) %>%
+##Created a variable for the time of day the ride ended
+mutate(time_of_day_ended = cut(x=hour(ended_at), breaks = breaks,
+                                   labels = labels, include.lowest = TRUE))
+
+
+#Calculates difference in metres between longitude/latitude 
+#points using Haversine formula
+cyclistic_data.trimmed$dist_m = geodist::geodist_vec(
+  x1 = cyclistic_data.trimmed$start_lng,
+  y1 = cyclistic_data.trimmed$start_lat,
+  x2 = cyclistic_data.trimmed$end_lng,
+  y2 = cyclistic_data.trimmed$end_lat,
+  paired = TRUE,
+  measure = "haversine"
+)  
+
+##Converts haversine distance to miles
+cyclistic_data.trimmed$dist_miles = 
+cyclistic_data.trimmed$dist_m / 1609
+
+#Subset removes a column you no longer want from a dataframe
+##Here removed dist_m in haversine meters because we no
+##longer need it, only want distance in miles
+cyclistic_data.trimmed = subset(cyclistic_data.trimmed,
+                                select = -dist_m)
+
+View(cyclistic_data.trimmed)
+
+#as.factor changes to a factor variable type
+##Here changes week_day_started from a number to a categorical,
+##it needs to be a factor for later analysis  
+cyclistic_data.trimmed$week_day_started =
+as.factor(cyclistic_data.trimmed$week_day_started)
+
+##Make weekend vs. weekday category for week_day_started
+cyclistic_data.trimmed %<>%
+select("ride_id":"dist_miles") %>%
+  mutate(weekday_weekend = case_when(week_day_started == "1" ~ "Weekend",
+                                     week_day_started == "2" ~ "Weekday",
+                                     week_day_started == "3" ~ "Weekday",
+                                     week_day_started == "4" ~ "Weekday",
+                                     week_day_started == "5" ~ "Weekday",
+                                     week_day_started == "6" ~ "Weekday",
+                                     week_day_started == "7" ~ "Weekend"))
+ 
+##Created a variable for peak commute times (6-10 AM and 4-7 PM)
+##weekdays vs. off peak, all day weekends and all other times
+##weekdays besides morning and afternoon commute
+cyclistic_data.trimmed  %<>%
+  select("ride_id":"weekday_weekend") %>%
+  mutate(peak_offpeak_commute = case_when(weekday_weekend == "Weekday" & time_of_day_started  == "Early Morning 6AM-10AM" ~ "Peak Commute",
+                                          weekday_weekend == "Weekday" & time_of_day_started == "Late Afternoon-Early Evening 4PM-7PM" ~ "Peak Commute",
+                                           TRUE ~ "Non Peak Commute"))
+                                         
+###Month ride was started in
+cyclistic_data.trimmed %<>%
+  select("ride_id":"peak_offpeak_commute") %>%
+  ###Creates Month 
+  mutate(month_started = month(started_at, label = TRUE))
+  
+
+
+###Season ride was started in
+
+cyclistic_data.trimmed %<>%
+  select("ride_id":"month_started") %>%
+  mutate(season_started = case_when(month_started ==
+                                      "Jan" ~ "Winter",
+                                     month_started ==
+                                      "Feb" ~ "Winter",
+                                     month_started ==
+                                      "Mar" ~ "Spring",
+                                     month_started ==
+                                      "Apr" ~ "Spring",
+                                     month_started ==
+                                      "May" ~ "Spring",
+                                     month_started ==
+                                      "Jun" ~ "Summer",
+                                     month_started ==
+                                      "Jul" ~ "Summer",
+                                     month_started ==
+                                      "Aug" ~ "Summer",
+                                     month_started ==
+                                      "Sep" ~ "Fall",
+                                     month_started ==
+                                      "Oct" ~ "Fall",
+                                     month_started ==
+                                      "Nov" ~ "Fall",
+                                     month_started ==
+                                      "Dec" ~ "Winter"))
+                                     
+                                     
+View(cyclistic_data.trimmed)                    
+
+##Analyzing/Summarizing data and finding trends
+
+
+##Average ride length for members vs. casual riders
+##Casual Riders have longer bike trips on average, average 
+##ride for casual is .30 hours, for members .18, min for both
+##is 1 second, max is very close, just shy of 25 hours
+cyclistic_data.trimmed %>%
+  group_by(member_casual) %>%
+  summarise(Lower = min(ride_time),
+            Average = mean(ride_time),
+            Upper = max(ride_time),
+            Difference =
+            max(ride_time)-min(ride_time)) %>%
+  arrange(Average)  %>%
+  View()
+
+
+###Average length of ride in miles
+cyclistic_data.trimmed %>%
+  group_by(member_casual) %>%
+  summarise(Lower = min(dist_miles),
+            Average = mean(dist_miles),
+            Upper = max(dist_miles),
+            Difference =
+              max(dist_miles)-min(dist_miles)) %>%
+  arrange(Average)  %>%
+  View()
+
+
+#prop.table creates a table with categorical variables
+##Electric vs. Classic bike use for members vs. casual riders
+##Members use classic bikes at slightly higher rates than
+##casual users, and electric bikes at slightly lower numbers
+##for casual users, 58.6% of them used classic bikes,
+##and for members, 65.8% used classic bikes
+prop.table(table(cyclistic_data.trimmed$rideable_type,
+                 cyclistic_data.trimmed$member_casual),2)*100
+
+
+##Casual Riders seem to ride bikes more on weekends than members,
+prop.table(table(cyclistic_data.trimmed$week_day_started,
+                 cyclistic_data.trimmed$member_casual),2)*100
+
+
+##Casual riders ride bikes more on weekends than members
+##casual users ride on weekends %33.6% of rides while members
+##ride 20.8% of rides on weekends
+prop.table(table(cyclistic_data.trimmed$weekday_weekend,
+                 cyclistic_data.trimmed$member_casual),2)*100
+
+
+##Members use bikes slightly more during peak commute times,
+##casual users rent bikes more at off peak times, but relatively
+##small difference, Early Morning 6-10AM is 16.6% for casual
+##riders and 22.9% for members, late afternoon-early evening is
+##19.7% casual riders and 22.3% members
+prop.table(table(cyclistic_data.trimmed$time_of_day_started,
+                 cyclistic_data.trimmed$member_casual),2)*100
+
+
+##Casual riders rent bikes less at peak commute times
+##26.8% of casual rentals are at peak commute times,
+##37.8% of member rentals are at peak commute times
+prop.table(table(cyclistic_data.trimmed$peak_offpeak_commute,
+                 cyclistic_data.trimmed$member_casual),2)*100
+
+
+
+###Season started
+prop.table(table(cyclistic_data.trimmed$season_started,
+                 cyclistic_data.trimmed$member_casual),2)*100
+
+
+##Visualizing Data
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###classic bike and electric bike usage for members
+cyclistic_data.trimmed %>%
+filter(member_casual == "member") %>%
+ggplot(aes(x = rideable_type, fill=rideable_type))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Type of Bikes Members Used",
+       x = "Type of Bike",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###classic bike and electric bike usage for casual users
+cyclistic_data.trimmed %>%
+  filter(member_casual == "casual") %>%
+  ggplot(aes(x = rideable_type, fill=rideable_type))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Type of Bikes Casual Users Used",
+       x = "Type of Bike",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###weekday vs. weekend usage for members
+cyclistic_data.trimmed %>%
+  filter(member_casual == "member") %>%
+  ggplot(aes(x = weekday_weekend, fill=weekday_weekend))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Ride on a Weekend or a Weekday - Members",
+       x = "Weekday or Weekend",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###weekday vs. weekend usage for casual users
+cyclistic_data.trimmed %>%
+  filter(member_casual == "casual") %>%
+  ggplot(aes(x = weekday_weekend, fill=weekday_weekend))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Ride on a Weekend or a Weekday - Casual",
+       x = "Weekday or Weekend",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###time of day ride started for members
+###The bottom was very cluttered, but I just edited it
+###manually using paint
+cyclistic_data.trimmed %>%
+  filter(member_casual == "member") %>%
+  ggplot(aes(x = time_of_day_started, fill=time_of_day_started))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Ride Time of Day - Members",
+       x = "Time of Day",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###time of day ride started for casual users
+###The bottom was very cluttered, but I just edited it
+###manually using paint
+cyclistic_data.trimmed %>%
+  filter(member_casual == "casual") %>%
+  ggplot(aes(x = time_of_day_started, fill=time_of_day_started))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Ride Time of Day - Casual",
+       x = "Time of Day",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###ride started at peak commute time vs. off peak timestarted for members
+cyclistic_data.trimmed %>%
+  filter(member_casual == "member") %>%
+  ggplot(aes(x = peak_offpeak_commute, fill=peak_offpeak_commute))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Ride Peak Commute vs. Offpeak - Members",
+       x = "Peak Commute vs. Offpeak",
+       y = "Percent of Total Rides")
+
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###ride started at peak commute time vs. off peak timestarted for members
+cyclistic_data.trimmed %>%
+  filter(member_casual == "casual") %>%
+  ggplot(aes(x = peak_offpeak_commute, fill=peak_offpeak_commute))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Ride Peak Commute vs. Offpeak - Casual",
+       x = "Peak Commute vs. Offpeak",
+       y = "Percent of Total Rides")
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###ride by season for members
+cyclistic_data.trimmed %>%
+  filter(member_casual == "member") %>%
+  ggplot(aes(x = season_started, fill=season_started))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Season of Ride - Members",
+       x = "Season",
+       y = "Percent of Total Rides")
+
+###Creates a bar graph in ggplot2 comparing percentages of
+###ride by season for casual users
+cyclistic_data.trimmed %>%
+  filter(member_casual == "casual") %>%
+  ggplot(aes(x = season_started, fill=season_started))+
+  geom_bar((aes(y = after_stat(count)/sum(count))),
+           position = "dodge",
+           alpha = 0.5)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(title = "Season of Ride - Casual",
+       x = "Season",
+       y = "Percent of Total Rides")
+
+
+#Created average_ride_time variable to insert into graph
+cyclistic_data.trimmed %<>%
+  select("ride_id":"month_started") %>%
+  mutate(average_ride_time = case_when(member_casual == "member" ~ 11.6,
+                                    member_casual == "casual" ~ 24.3))
+
+
+###Creates a bar graph of Average Ride Time for
+#Members vs. Casual
+ggplot(cyclistic_data.trimmed, aes(x = member_casual, y=average_ride_time))+
+  geom_bar(stat="identity",
+    position = "dodge",
+    alpha = 0.5)+
+    theme_bw()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())+
+          labs(title = "Avg Len of Ride - Members vs. Casual",
+              x = "Members Vs. Casual",
+              y = "Average # of Minutes")
